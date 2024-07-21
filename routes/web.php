@@ -8,6 +8,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
+Route::get('/generate', [AssessmentController::class, 'generate']);
 Route::get('/assessments/{id}/feedback', [AssessmentController::class, 'getFeedback']);
 Route::get('/assessments/{sessionId}/student/{studentId}/feedback', [AssessmentController::class, 'getStudentFeedback']);
+
+Route::post('/aiFeedback', [AssessmentController::class, 'aiFeedback']);

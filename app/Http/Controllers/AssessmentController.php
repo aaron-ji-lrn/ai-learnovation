@@ -19,7 +19,8 @@ class AssessmentController extends Controller
     {
         $student1 = [
             "student_id"=> "12345",
-            "assessment"=> [
+            "name" => "John Doe",
+            "assessments"=> [
                 [
                     "question_id" => "q1",
                     "question_text" => "What is the capital of France?",
@@ -99,12 +100,13 @@ class AssessmentController extends Controller
                             "changed" => false,
                         ],
                     ],
-                ]       
+                ]
             ]
         ];
         $student2 = [
             "student_id" => "67890",
-            "assessment" => [
+            "name" => "Peter Parker",
+            "assessments" => [
                 [
                     "question_id" => "q1",
                     "question_text" => "What is the capital of Germany?",
@@ -195,7 +197,7 @@ class AssessmentController extends Controller
                 return $student['student_id'] === $studentId;
             });
         }
-        
+
 
         return $data;
     }
@@ -215,6 +217,15 @@ class AssessmentController extends Controller
         ]);
     }
 
+    public function generate()
+    {
+        $students = $this->getStudentData();
+
+        return view('generate', [
+            'students' => json_encode($students)
+        ]);
+    }
+
     public function getStudentFeedback($sessionId, $studentId)
     {
         // $assessment = Assessment::where('student_id', $studentId)->firstOrFail();
@@ -225,5 +236,13 @@ class AssessmentController extends Controller
             'feedback' => $feedback['choices'][0]['message']['content'],
             'students' => [$studentId],
         ]);
+    }
+
+    public function aiFeedback(Request $request)
+    {
+        $data = $request->all();
+        $feedback = $this->aiService->getFeedback($data);
+
+        return response()->json($feedback);
     }
 }

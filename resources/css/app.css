@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.dropdown {
+
+    button {
+        width: 300px;
+        min-width: 200px;
+    }
+    .dropdown-items {
+        min-width: 500px;
+    }
+}

@@ -20,30 +20,39 @@ class AssessmentController extends Controller
         $student1 = [
             "student_id"=> "12345",
             "name" => "John Doe",
+            "age" => 20,
+            "nationality" => "Australian",
             "assessments"=> [
                 [
                     "question_id" => "q1",
                     "question_text" => "What is the capital of France?",
+                    "question_type" => 'multiple-choice-question',
                     "difficulty" => "easy",
                     "tags" => ["geography"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses"=> [
                         [
                             "response"=> "Paris",
                             "changed"=> false,
-                            "timestamp"=> "2024-01-01T12:00:00Z",
+                            "time_started"=> "2024-01-01T12:00:00Z"
                         ]
                     ]
                 ],
                 [
                     "question_id" => "q2",
                     "question_text" => "Solve the equation: 2x + 3 = 7",
+                    "question_type" => 'math-formula',
                     "difficulty" => "medium",
                     "tags" => ["math", "algebra"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "2",
                             "timestamp" => "2024-01-01T12:02:00Z",
                             "changed" => true,
+
                         ],
                         [
                             "response" => "x = 2",
@@ -55,8 +64,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q3",
                     "question_text" => "What is the process of photosynthesis?",
+                    "question_type" => 'essay',
                     "difficulty" => "hard",
                     "tags" => ["biology"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "Photosynthesis is the process by which plants make their food using sunlight.",
@@ -68,8 +80,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q4",
                     "question_text" => "Name the largest planet in our solar system.",
+                    "question_type" => 'multiple-choice-question',
                     "difficulty" => "easy",
                     "tags" => ["astronomy"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "Saturn",
@@ -86,8 +101,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q5",
                     "question_text" => "Explain the significance of the Battle of Hastings.",
+                    "question_type" => 'essay',
                     "difficulty" => "medium",
                     "tags" => ["history"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "It was a battle that took place in 1066.",
@@ -106,12 +124,17 @@ class AssessmentController extends Controller
         $student2 = [
             "student_id" => "67890",
             "name" => "Peter Parker",
+            "age" => 21,
+            "nationality" => "American",
             "assessments" => [
                 [
                     "question_id" => "q1",
                     "question_text" => "What is the capital of Germany?",
+                    "question_type" => 'multiple-choice-question',
                     "difficulty" => "easy",
                     "tags" => ["geography"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "Berlin",
@@ -123,8 +146,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q2",
                     "question_text" => "Calculate the value of 5 + 3 * 2",
+                    "question_type" => 'math-formula',
                     "difficulty" => "medium",
                     "tags" => ["math", "arithmetic"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "16",
@@ -141,8 +167,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q3",
                     "question_text" => "Describe the water cycle.",
+                    "question_type" => 'essay',
                     "difficulty" => "hard",
                     "tags" => ["science"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "The water cycle is the process where water evaporates, condenses, and precipitates.",
@@ -154,8 +183,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q4",
                     "question_text" => "Who wrote 'Romeo and Juliet'?",
+                    "question_type" => 'multiple-choice-question',
                     "difficulty" => "easy",
                     "tags" => ["literature"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "Charles Dickens",
@@ -172,8 +204,11 @@ class AssessmentController extends Controller
                 [
                     "question_id" => "q5",
                     "question_text" => "What caused the Great Depression?",
+                    "question_type" => 'multiple-choice-question',
                     "difficulty" => "medium",
                     "tags" => ["history"],
+                    "time_spent"=> "30s",
+                    "time_duration" => "1m",
                     "responses" => [
                         [
                             "response" => "A series of banking failures.",
@@ -197,7 +232,6 @@ class AssessmentController extends Controller
                 return $student['student_id'] === $studentId;
             });
         }
-
 
         return $data;
     }
@@ -238,11 +272,11 @@ class AssessmentController extends Controller
         ]);
     }
 
-    public function aiFeedback(Request $request)
+    public function aiFeedback($studentId)
     {
-        $data = $request->all();
+        $data = $this->getStudentData($studentId);
         $feedback = $this->aiService->getFeedback($data);
 
-        return response()->json($feedback);
+        return response()->json($feedback['choices'][0]['message']['content']);
     }
 }

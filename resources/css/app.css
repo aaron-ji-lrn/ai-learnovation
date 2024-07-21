@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.lrn-hf {
+    header {
+        background-color: #00313d;
+    }
+}
+
 .dropdown {
 
     button {

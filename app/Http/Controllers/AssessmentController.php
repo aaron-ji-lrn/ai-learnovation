@@ -115,6 +115,7 @@ class AssessmentController extends Controller
                 ],
             ];
 
+            $students[$question->test_uuid]['session_id'] = $question->test_uuid;
             $students[$question->test_uuid]['assessments'][] = $studentInfo;
             $students[$question->test_uuid]['student_id'] = $studentId;
             $students[$question->test_uuid]['name'] = $studentId;
@@ -123,7 +124,7 @@ class AssessmentController extends Controller
         }
 
         $total = [];
-        foreach($students as $sessionId => $student) {
+        foreach($students as $student) {
             $total[] = $student;
         }
 

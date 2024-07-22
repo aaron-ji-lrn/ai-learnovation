@@ -14,6 +14,7 @@ const ClassDropdown: React.FC<React.PropsWithChildren<ClassTableProps>> = ({
     placeholder,
 }) => {
     const [isOpen, setIsOpen] = React.useState(false);
+    const [selectedItem, setSelectedItem] = React.useState('');
     const [searchString, setSearchString] = React.useState('');
 
     return (
@@ -24,7 +25,9 @@ const ClassDropdown: React.FC<React.PropsWithChildren<ClassTableProps>> = ({
                 }}
                 className="flex justify-between text-left p-4 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-                <span className="font-bold">{label}</span>
+                <span className="font-bold w-32 truncate">
+                    {selectedItem || label}
+                </span>
                 <span className="fa-solid fa-caret-down"></span>
             </button>
             {isOpen && (
@@ -63,6 +66,7 @@ const ClassDropdown: React.FC<React.PropsWithChildren<ClassTableProps>> = ({
                                 className="inline-flex w-full p-4 mt-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md border-b-2 border-gray-3"
                                 onClick={() => {
                                     onSelect(item);
+                                    setSelectedItem(item.name);
                                     setIsOpen(false);
                                 }}
                             >

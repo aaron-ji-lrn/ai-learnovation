@@ -6,16 +6,19 @@ function initAxios() {
     // @ts-ignore
     window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 }
-export const aiFeedback = async (data) => {
+// @ts-ignore
+export const aiFeedback = async (activityId: string, sessionId: string) => {
     // @ts-ignore
     if (window.axios === undefined) {
         initAxios();
     }
-    if (!data.id) return;
+    if (!sessionId || !activityId) return;
 
     try {
         // @ts-ignore
-        const response = await window.axios.get(`/feedback/${data.id}`);
+        const response = await window.axios.get(
+            `/feedback/${activityId}/${sessionId}`,
+        );
         return response.data;
     } catch (err) {
         window.console.error(err);

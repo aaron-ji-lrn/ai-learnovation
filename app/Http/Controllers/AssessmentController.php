@@ -39,13 +39,13 @@ class AssessmentController extends Controller
         inner join tbl_test_questions tq on tq.test_id=t.test_id and tq.sheet_reference = ts.source_sheet_reference
         where e.code= ?';
         $bindings = [$activityId];
-        
+
         // get data from dexter
         if (!empty($sessionId)) {
             $sql .= ' and t.test_uuid = ?';
             $bindings = array_merge($bindings, [$sessionId]);
         }
-        
+
         $dexterData = DB::connection('dexter')->select($sql, $bindings);
 
         return $dexterData;
@@ -60,7 +60,7 @@ class AssessmentController extends Controller
                 select s.difficulty, t.name as tag from sheets s
                 inner join sheets_tags st on st.sheet_id=s.id
                 inner join tags t on t.id = st.tag_id
-                where s.reference=? and s.organisation_id=?;', 
+                where s.reference=? and s.organisation_id=?;',
                 [$item_reference, $organisation_id]
             );
             $this->itemData[$item_reference] = $ibkData;
@@ -87,7 +87,7 @@ class AssessmentController extends Controller
             return $item->reference === $itemReference;
         });
         $currentItem = array_shift($currentItems);
-    
+
         return $currentItem->time ? $currentItem->time .'s' : 0;
     }
 
@@ -174,9 +174,9 @@ class AssessmentController extends Controller
         ]);
     }
 
-    public function aiFeedback($sessionId)
+    public function aiFeedback($sessionId, $activityId = 'ai_english_assessment')
     {
-        $activityId='ai_english_assessment';
+        // $activityId='ai_english_assessment';
         // $sessionId='469cf2b8-f16d-4fe2-835d-375bfb888351';
 
         $data = $this->getStudentData($activityId, $sessionId);

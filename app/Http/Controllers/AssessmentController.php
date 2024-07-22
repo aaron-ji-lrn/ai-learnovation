@@ -174,11 +174,8 @@ class AssessmentController extends Controller
         ]);
     }
 
-    public function aiFeedback($sessionId, $activityId = 'ai_english_assessment')
+    public function aiFeedback($activityId = 'ai_english_assessment', $sessionId)
     {
-        // $activityId='ai_english_assessment';
-        // $sessionId='469cf2b8-f16d-4fe2-835d-375bfb888351';
-
         $data = $this->getStudentData($activityId, $sessionId);
         $feedback = $this->aiService->getStudentFeedback($data);
 

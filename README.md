@@ -5,10 +5,37 @@
 ## Getting started
 - Run `composer install`
 - `yarn install`
-- ./vendor/bin/sail artisan migrate
-- ./vendor/bin/sail up -d
-- .env configuration → openai_key
-- http://localhost:8085/assessments/1/feedback
+- .env configuration
+- add openai_key to call AI endpoint
+- set the session driver to use file
+```
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+```
+- add datasource configurations for ibk, qr, dexter, you can get the consumer 0034 datasource info from central
+```
+DEXTER_CONNECTION=mysql
+DEXTER_HOST=db-hmhccas.int.lninfra.net
+DEXTER_DB_NAME=dev_dexter_ember
+DEXTER_DB_USER=dev
+DEXTER_DB_PASSWORD=
+
+QR_CONNECTION=pgsql
+QR_HOST=int-pgsqla1.int.lninfra.net
+QR_PORT=5432
+QR_DB_NAME=int_questionresponses_shared
+QR_DB_USER=int_questionresponses_shared
+QR_DB_PASSWORD=
+
+IBK_CONNECTION=mysql
+IBK_HOST=db-ibk-master.int.lninfra.net
+IBK_DB_NAME=dev_itembank
+IBK_DB_USER=dev
+IBK_DB_PASSWORD=
+```
 
 ### Running the frontend
 - yarn install
@@ -17,9 +44,9 @@
 
 ### Running the backend
 ```
-curl -s https://laravel.build/assessment-feedback | bash
-cd assessment-feedback && ./vendor/bin/sail up
+php artisan serve
 ```
+we didn't use sail for the docker environment, because the for php8.3 with sail plugin we couldn't connect to postgres DB
 
 ## Tech Stack
 - Backend: PHP + Laravel + Blade + OpenAI

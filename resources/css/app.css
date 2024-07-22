@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.lrn-hf {
+    header {
+        background-color: #00313d;
+    }
+}
+
+.dropdown {
+
+    button {
+        width: 300px;
+        min-width: 200px;
+    }
+    .dropdown-items {
+        min-width: 500px;
+    }
+}

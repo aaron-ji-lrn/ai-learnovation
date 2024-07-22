@@ -34,7 +34,12 @@ export default function ({ data }: AssessmentProps) {
     const responses = Array.isArray(data.response)
         ? data.response
         : [data.response || []];
-
+    const questionData = JSON.parse(data.question_text);
+    let value = questionData.stimulus;
+    if (questionData.type === 'orderlist') {
+        value = `Stimulus: ${questionData.stimulus}, List: ${questionData.list.join(', ')}`;
+    }
+    
     return (
         <div className="pl-2">
             <div
@@ -54,7 +59,7 @@ export default function ({ data }: AssessmentProps) {
                     <GridCol label="Question type" value={data.question_type} />
                     <GridCol
                         label="Question Stimulus"
-                        value={data.question_text}
+                        value={value}
                     />
 
                     <GridCol label="Difficulty" value={data.difficulty} />
@@ -68,7 +73,7 @@ export default function ({ data }: AssessmentProps) {
                             <div key={index}>
                                 <GridCol
                                     label="Response"
-                                    value={response.response}
+                                    value={["association", "orderlist","clozeassociation","plaintext", "mcq", "clozedropdown"].includes(questionData.type) ? JSON.parse(response.response).value : response.response}
                                 />
                                 <GridCol
                                     label="No. of attempts"

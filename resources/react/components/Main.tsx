@@ -138,14 +138,6 @@ function Main() {
                                             label="Student ID"
                                             value={selectedStudent.id}
                                         />
-                                        <GridCol
-                                            label="Age"
-                                            value={selectedStudent.age.toString()}
-                                        />
-                                        <GridCol
-                                            label="Nationality"
-                                            value={selectedStudent.nationality}
-                                        />
                                         <GridCol label="Assessments" value="" />
                                         {selectedStudent.assessments.map(
                                             (assessment, assessKey) => (

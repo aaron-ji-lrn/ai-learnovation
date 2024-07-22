@@ -9,6 +9,13 @@ class AssessmentController extends Controller
 {
     protected $aiService;
     protected $itemData = [];
+    protected $levels = [
+        1 => 'Easy',
+        2 => 'Medium',
+        3 => 'Hard',
+        4 => 'Very Hard',
+        5 => 'Extremely Hard',
+    ];
 
     public function __construct(AiService $aiService)
     {
@@ -104,7 +111,7 @@ class AssessmentController extends Controller
                 'question_id' => 'Question ' . ($i + 1),
                 'question_text' => $qr->question,
                 'question_type' => $question->type,
-                'difficulty' => $ibk[0]->difficulty,
+                'difficulty' => $this->levels[$ibk[0]->difficulty],
                 'tags' => array_column($ibk, 'tag'),
                 'time_spent' => $this->getTimeSpentOnItem($question->metadata, $question->item_reference),
                 "time_duration" => "1m",
@@ -119,8 +126,6 @@ class AssessmentController extends Controller
             $students[$question->test_uuid]['assessments'][] = $studentInfo;
             $students[$question->test_uuid]['student_id'] = $studentId;
             $students[$question->test_uuid]['name'] = $studentId;
-            $students[$question->test_uuid]['age'] = 20;
-            $students[$question->test_uuid]['nationality'] = "Australian";
         }
 
         $total = [];
@@ -144,7 +149,7 @@ class AssessmentController extends Controller
                 'question_id' => 'Question ' . ($i + 1),
                 'question_text' => $qr->question,
                 'question_type' => $question->type,
-                'difficulty' => $ibk[0]->difficulty,
+                'difficulty' => $this->levels[$ibk[0]->difficulty],
                 'tags' => array_column($ibk, 'tag'),
                 'time_spent' => $this->getTimeSpentOnItem($question->metadata, $question->item_reference),
                 "time_duration" => "1m",
@@ -156,8 +161,6 @@ class AssessmentController extends Controller
             ];
             $student['student_id'] = $studentId;
             $student['name'] = $studentId;
-            $student['age'] = 20;
-            $student['nationality'] = "Australian";
             $student['assessments'][] = $studentInfo;
         }
 

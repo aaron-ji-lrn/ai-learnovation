@@ -105,7 +105,9 @@ function Main() {
                     </div>
                     <div className="flex-1 bg-gray-200 p-4">
                         <div className="mt-2">
-                            {feedbackLoading && <Spinner>Loading</Spinner>}
+                            {feedbackLoading && (
+                                <Spinner>Generating...</Spinner>
+                            )}
                             {aiFeedbackResponse && (
                                 <Card title="Feedback" avatar={<AiAvatar />}>
                                     <MarkdownContainer>

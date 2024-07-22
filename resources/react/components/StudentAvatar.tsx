@@ -2,7 +2,7 @@ import * as React from 'react';
 
 export default function () {
     return (
-        <div className="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+        <div className="relative w-10 h-10 overflow-hidden rounded-full bg-gray-600">
             <svg
                 className="absolute w-12 h-12 text-gray-400 -left-1"
                 fill="#ffffff"

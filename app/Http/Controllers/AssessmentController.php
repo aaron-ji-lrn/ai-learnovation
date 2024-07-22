@@ -34,8 +34,8 @@ class AssessmentController extends Controller
                     "responses"=> [
                         [
                             "response"=> "Paris",
-                            "changed"=> false,
-                            "time_started"=> "2024-01-01T12:00:00Z"
+                            "timestamp" => "2024-01-01T12:02:00Z",
+                            "changed"=> false
                         ]
                     ]
                 ],
@@ -186,7 +186,7 @@ class AssessmentController extends Controller
                     "question_type" => 'multiple-choice-question',
                     "difficulty" => "easy",
                     "tags" => ["literature"],
-                    "time_spent"=> "30s",
+                    "time_spent"=> "10s",
                     "time_duration" => "1m",
                     "responses" => [
                         [

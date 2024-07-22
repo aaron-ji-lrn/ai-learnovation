@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-interface StudentTableProps {
+interface ClassTableProps {
     items: any[];
     label: string;
     onSelect: (item: any) => void;
     placeholder: string;
 }
 
-const Dropdown: React.FC<React.PropsWithChildren<StudentTableProps>> = ({
+const ClassDropdown: React.FC<React.PropsWithChildren<ClassTableProps>> = ({
     onSelect,
     label,
     items,
@@ -45,7 +45,7 @@ const Dropdown: React.FC<React.PropsWithChildren<StudentTableProps>> = ({
                             Name
                         </div>
                         <div className="text-sm text-gray-700">
-                            No. of assessments
+                            No. of students
                         </div>
                     </div>
                     {items
@@ -73,7 +73,7 @@ const Dropdown: React.FC<React.PropsWithChildren<StudentTableProps>> = ({
                                     </span>
                                 </div>
 
-                                <div>{item.assessments.length}</div>
+                                <div>{item.students.length}</div>
                             </div>
                         ))}
                 </div>
@@ -82,4 +82,4 @@ const Dropdown: React.FC<React.PropsWithChildren<StudentTableProps>> = ({
     );
 };
 
-export default Dropdown;
+export default ClassDropdown;

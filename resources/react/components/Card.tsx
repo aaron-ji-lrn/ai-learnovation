@@ -18,7 +18,7 @@ const Card: React.FC<React.PropsWithChildren<CardProps>> = ({
                     {title}
                 </h2>
             </div>
-            <div className="container">{children}</div>
+            <div className="container mt-2">{children}</div>
         </div>
     );
 };

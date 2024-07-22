@@ -11,8 +11,8 @@ const GridCol = ({ label, value }: { label: string; value: string }) => {
 
 type Response = {
     response: string;
-    changed: boolean;
-    timestamp: string;
+    changed_response: boolean;
+    attempted: number;
 };
 
 type AssessmentProps = {
@@ -24,12 +24,16 @@ type AssessmentProps = {
         tags: string[];
         time_duration: string;
         time_spent: string;
-        responses: Response[];
+        response: Response[];
     };
 };
 
 export default function ({ data }: AssessmentProps) {
     const [isOpen, setIsOpen] = React.useState(false);
+
+    const responses = Array.isArray(data.response)
+        ? data.response
+        : [data.response || []];
 
     return (
         <div className="pl-2">
@@ -53,26 +57,31 @@ export default function ({ data }: AssessmentProps) {
                         value={data.question_text}
                     />
 
-                    <GridCol label="difficulty" value={data.difficulty} />
+                    <GridCol label="Difficulty" value={data.difficulty} />
                     <GridCol label="Tags" value={data.tags.toString()} />
                     <GridCol label="Time duration" value={data.time_duration} />
                     <GridCol label="Time spent" value={data.time_spent} />
                     <GridCol label="Responses" value="" />
 
                     <div className="pl-4">
-                        {data.responses.map((response, index) => (
+                        {responses.map((response, index) => (
                             <div key={index}>
                                 <GridCol
                                     label="Response"
                                     value={response.response}
                                 />
                                 <GridCol
-                                    label="Times started"
-                                    value={response.timestamp}
+                                    label="No. of attempts"
+                                    value={
+                                        response?.attempted.toString() || '0'
+                                    }
                                 />
                                 <GridCol
                                     label="Response changed"
-                                    value={response.changed.toString()}
+                                    value={
+                                        response.changed_response.toString() ||
+                                        ''
+                                    }
                                 />
                             </div>
                         ))}

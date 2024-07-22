@@ -9,12 +9,21 @@
 }
 
 .dropdown {
-
     button {
         width: 300px;
         min-width: 200px;
     }
     .dropdown-items {
         min-width: 500px;
+    }
+}
+
+.dropdown.category {
+    button {
+        width: 200px;
+        min-width: 150px;
+    }
+    .dropdown-items {
+        min-width: 200px;
     }
 }

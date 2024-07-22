@@ -15,7 +15,7 @@
 - yarn dev
 - http://localhost:8085/generate/
 
-### Running the banckend
+### Running the backend
 ```
 curl -s https://laravel.build/assessment-feedback | bash
 cd assessment-feedback && ./vendor/bin/sail up

@@ -61,7 +61,7 @@ function Main() {
     return (
         <div className="lrn-hf min-h-screen flex flex-col">
             <header className="text-white font-bold text-2xl p-4">
-                Holistic Feedback
+                Learnovation: AI Holistic Feedback
             </header>
             <div className="flex p-4 flex-row">
                 <div className="flex p-4 text-xl">Generate feedback by</div>
@@ -106,10 +106,15 @@ function Main() {
                     <div className="flex-1 bg-gray-200 p-4">
                         <div className="mt-2">
                             {feedbackLoading && (
-                                <Spinner>Generating...</Spinner>
+                                <div className="flex justify-center mt-12">
+                                    <Spinner>Generating...</Spinner>
+                                </div>
                             )}
                             {aiFeedbackResponse && (
-                                <Card title="Feedback" avatar={<AiAvatar />}>
+                                <Card
+                                    title="AI Generated Feedback"
+                                    avatar={<AiAvatar />}
+                                >
                                     <MarkdownContainer>
                                         {aiFeedbackResponse}
                                     </MarkdownContainer>

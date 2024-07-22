@@ -2,280 +2,184 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Assessment;
 use App\Services\AiService;
+use Illuminate\Support\Facades\DB;
 
 class AssessmentController extends Controller
 {
     protected $aiService;
+    protected $itemData = [];
 
     public function __construct(AiService $aiService)
     {
         $this->aiService = $aiService;
     }
 
-    public function getStudentData($studentId = null)
+    public function getQuestionResponseId($user_id, $response_id)
     {
-        $student1 = [
-            "student_id"=> "12345",
-            "name" => "John Doe",
-            "age" => 20,
-            "nationality" => "Australian",
-            "assessments"=> [
-                [
-                    "question_id" => "q1",
-                    "question_text" => "What is the capital of France?",
-                    "question_type" => 'multiple-choice-question',
-                    "difficulty" => "easy",
-                    "tags" => ["geography"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses"=> [
-                        [
-                            "response"=> "Paris",
-                            "timestamp" => "2024-01-01T12:02:00Z",
-                            "changed"=> false
-                        ]
-                    ]
-                ],
-                [
-                    "question_id" => "q2",
-                    "question_text" => "Solve the equation: 2x + 3 = 7",
-                    "question_type" => 'math-formula',
-                    "difficulty" => "medium",
-                    "tags" => ["math", "algebra"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "2",
-                            "timestamp" => "2024-01-01T12:02:00Z",
-                            "changed" => true,
-
-                        ],
-                        [
-                            "response" => "x = 2",
-                            "timestamp" => "2024-01-01T12:03:30Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q3",
-                    "question_text" => "What is the process of photosynthesis?",
-                    "question_type" => 'essay',
-                    "difficulty" => "hard",
-                    "tags" => ["biology"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "Photosynthesis is the process by which plants make their food using sunlight.",
-                            "timestamp" => "2024-01-01T12:05:00Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q4",
-                    "question_text" => "Name the largest planet in our solar system.",
-                    "question_type" => 'multiple-choice-question',
-                    "difficulty" => "easy",
-                    "tags" => ["astronomy"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "Saturn",
-                            "timestamp" => "2024-01-01T12:06:00Z",
-                            "changed" => true,
-                        ],
-                        [
-                            "response" => "Jupiter",
-                            "timestamp" => "2024-01-01T12:07:15Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q5",
-                    "question_text" => "Explain the significance of the Battle of Hastings.",
-                    "question_type" => 'essay',
-                    "difficulty" => "medium",
-                    "tags" => ["history"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "It was a battle that took place in 1066.",
-                            "timestamp" => "2024-01-01T12:10:00Z",
-                            "changed" => true,
-                        ],
-                        [
-                            "response" => "The Battle of Hastings in 1066 led to the Norman conquest of England.",
-                            "timestamp" => "2024-01-01T12:12:00Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ]
-            ]
-        ];
-        $student2 = [
-            "student_id" => "67890",
-            "name" => "Peter Parker",
-            "age" => 21,
-            "nationality" => "American",
-            "assessments" => [
-                [
-                    "question_id" => "q1",
-                    "question_text" => "What is the capital of Germany?",
-                    "question_type" => 'multiple-choice-question',
-                    "difficulty" => "easy",
-                    "tags" => ["geography"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "Berlin",
-                            "timestamp" => "2024-01-02T14:00:00Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q2",
-                    "question_text" => "Calculate the value of 5 + 3 * 2",
-                    "question_type" => 'math-formula',
-                    "difficulty" => "medium",
-                    "tags" => ["math", "arithmetic"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "16",
-                            "timestamp" => "2024-01-02T14:02:00Z",
-                            "changed" => true,
-                        ],
-                        [
-                            "response" => "11",
-                            "timestamp" => "2024-01-02T14:03:30Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q3",
-                    "question_text" => "Describe the water cycle.",
-                    "question_type" => 'essay',
-                    "difficulty" => "hard",
-                    "tags" => ["science"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "The water cycle is the process where water evaporates, condenses, and precipitates.",
-                            "timestamp" => "2024-01-02T14:05:00Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q4",
-                    "question_text" => "Who wrote 'Romeo and Juliet'?",
-                    "question_type" => 'multiple-choice-question',
-                    "difficulty" => "easy",
-                    "tags" => ["literature"],
-                    "time_spent"=> "10s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "Charles Dickens",
-                            "timestamp" => "2024-01-02T14:06:00Z",
-                            "changed" => true,
-                        ],
-                        [
-                            "response" => "William Shakespeare",
-                            "timestamp" => "2024-01-02T14:07:15Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-                [
-                    "question_id" => "q5",
-                    "question_text" => "What caused the Great Depression?",
-                    "question_type" => 'multiple-choice-question',
-                    "difficulty" => "medium",
-                    "tags" => ["history"],
-                    "time_spent"=> "30s",
-                    "time_duration" => "1m",
-                    "responses" => [
-                        [
-                            "response" => "A series of banking failures.",
-                            "timestamp" => "2024-01-02T14:10:00Z",
-                            "changed" => true,
-                        ],
-                        [
-                            "response" => "The Great Depression was caused by the stock market crash of 1929 and subsequent banking failures.",
-                            "timestamp" => "2024-01-02T14:12:00Z",
-                            "changed" => false,
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-        $data = [$student1, $student2];
-
-        if ($studentId) {
-            $data = array_filter($data, function ($student) use ($studentId) {
-                return $student['student_id'] === $studentId;
-            });
-        }
-
-        return $data;
+        $consumer_id = '0034';
+        return $consumer_id . '_' . $user_id . '_' . $response_id;
     }
 
-    public function getFeedback($assessmentId)
+    public function getActivityData($activityId=null, $sessionId=null)
     {
-        // $assessment = Assessment::findOrFail($assessmentId);
+        $sql = 'select u.username, t.test_uuid, t.score, t.max_score, t.num_questions, t.count_attempted,
+            TIMEDIFF(t.time_completed,t.time_prepared) as session_time_spent,
+            t.metadata,
+            ts.source_sheet_reference as item_reference,
+            ts.count_questions_attempted,
+            ts.organisation_id,
+            tq.widget_response_id,
+            tq.attempted as question_attempted,
+            tq.type
+        from tbl_tests t
+        inner join tbl_exams e on e.id=t.exam_id
+        inner join tbl_users u on u.user_id=t.user_id
+        inner join tbl_test_sheets ts on t.test_id = ts.test_id
+        inner join tbl_test_questions tq on tq.test_id=t.test_id and tq.sheet_reference = ts.source_sheet_reference
+        where e.code= ?';
+        $bindings = [$activityId];
+        
+        // get data from dexter
+        if (!empty($sessionId)) {
+            $sql .= ' and t.test_uuid = ?';
+            $bindings = array_merge($bindings, [$sessionId]);
+        }
+        
+        $dexterData = DB::connection('dexter')->select($sql, $bindings);
 
-        $data = $this->getStudentData();
-        $feedback = $this->aiService->getFeedback($data);
+        return $dexterData;
+    }
 
-        return view('class_feedback', [
-            'feedback' => $feedback['choices'][0]['message']['content'],
-            'students' => array_map(function ($student) {
-                return $student['student_id'];
-            }, $data),
-        ]);
+    public function getItemData($item_reference, $organisation_id)
+    {
+        if (isset($this->itemData[$item_reference])) {
+            return $this->itemData[$item_reference];
+        } else {
+            $ibkData = DB::connection('ibk')->select('
+                select s.difficulty, t.name as tag from sheets s
+                inner join sheets_tags st on st.sheet_id=s.id
+                inner join tags t on t.id = st.tag_id
+                where s.reference=? and s.organisation_id=?;', 
+                [$item_reference, $organisation_id]
+            );
+            $this->itemData[$item_reference] = $ibkData;
+            return $ibkData;
+        }
+    }
+
+    public function getResponseData($userId, $responseId)
+    {
+        $totalResponseIds[] = $this->getQuestionResponseId($userId, $responseId);
+        $placeholders = rtrim(str_repeat('?,', count($totalResponseIds)), ',');
+        $parameters = array_merge([$userId], $totalResponseIds);
+
+        $qrData = DB::connection('qr')->select("select question,response from get_question_response_with_latest_question(?, ARRAY[$placeholders])", $parameters);
+
+        return $qrData[0] ?? [];
+    }
+
+    public function getTimeSpentOnItem($metadata, $itemReference)
+    {
+        $metadata = json_decode($metadata);
+        $sessionItems = $metadata->items;
+        $currentItems = array_filter($sessionItems, function($item) use ($itemReference) {
+            return $item->reference === $itemReference;
+        });
+        $currentItem = array_shift($currentItems);
+    
+        return $currentItem->time ? $currentItem->time .'s' : 0;
+    }
+
+    public function getClassData($activityId)
+    {
+        $questions = $this->getActivityData($activityId);
+
+        $students = [];
+        foreach($questions as $i => $question) {
+            $studentId = $question->username;
+            $qr = $this->getResponseData($studentId, $question->widget_response_id);
+            $ibk = $this->getItemData($question->item_reference, $question->organisation_id);
+            $studentInfo = [
+                'question_id' => 'Question ' . ($i + 1),
+                'question_text' => $qr->question,
+                'question_type' => $question->type,
+                'difficulty' => $ibk[0]->difficulty,
+                'tags' => array_column($ibk, 'tag'),
+                'time_spent' => $this->getTimeSpentOnItem($question->metadata, $question->item_reference),
+                "time_duration" => "1m",
+                'response' => [
+                    'response' => $qr->response,
+                    'attempted' => $question->question_attempted,
+                    'changed_response' => $question->question_attempted > 1 ? 'true' : 'false',
+                ],
+            ];
+
+            $students[$question->test_uuid]['assessments'][] = $studentInfo;
+            $students[$question->test_uuid]['student_id'] = $studentId;
+            $students[$question->test_uuid]['name'] = $studentId;
+            $students[$question->test_uuid]['age'] = 20;
+            $students[$question->test_uuid]['nationality'] = "Australian";
+        }
+
+        $total = [];
+        foreach($students as $sessionId => $student) {
+            $total[] = $student;
+        }
+
+        return $total;
+    }
+
+    public function getStudentData($activityId, $sessionId)
+    {
+        $questions = $this->getActivityData($activityId, $sessionId);
+
+        $student = [];
+        foreach($questions as $i => $question) {
+            $studentId = $question->username;
+            $qr = $this->getResponseData($studentId, $question->widget_response_id);
+            $ibk = $this->getItemData($question->item_reference, $question->organisation_id);
+            $studentInfo = [
+                'question_id' => 'Question ' . ($i + 1),
+                'question_text' => $qr->question,
+                'question_type' => $question->type,
+                'difficulty' => $ibk[0]->difficulty,
+                'tags' => array_column($ibk, 'tag'),
+                'time_spent' => $this->getTimeSpentOnItem($question->metadata, $question->item_reference),
+                "time_duration" => "1m",
+                'response' => [
+                    'response' => $qr->response,
+                    'attempted' => $question->question_attempted,
+                    'changed_response' => $question->question_attempted > 1 ? 'true' : 'false',
+                ],
+            ];
+            $student['student_id'] = $studentId;
+            $student['name'] = $studentId;
+            $student['age'] = 20;
+            $student['nationality'] = "Australian";
+            $student['assessments'][] = $studentInfo;
+        }
+
+        return [$student];
     }
 
     public function generate()
     {
-        $students = $this->getStudentData();
+        $activityId='ai_english_assessment';
+        $students = $this->getClassData($activityId);
 
         return view('generate', [
             'students' => json_encode($students)
         ]);
     }
 
-    public function getStudentFeedback($sessionId, $studentId)
+    public function aiFeedback($sessionId)
     {
-        // $assessment = Assessment::where('student_id', $studentId)->firstOrFail();
-        $data = $this->getStudentData($studentId);
+        $activityId='ai_english_assessment';
+        // $sessionId='469cf2b8-f16d-4fe2-835d-375bfb888351';
+
+        $data = $this->getStudentData($activityId, $sessionId);
         $feedback = $this->aiService->getStudentFeedback($data);
-
-        return view('student_feedback', [
-            'feedback' => $feedback['choices'][0]['message']['content'],
-            'students' => [$studentId],
-        ]);
-    }
-
-    public function aiFeedback($studentId)
-    {
-        $data = $this->getStudentData($studentId);
-        $feedback = $this->aiService->getFeedback($data);
 
         return response()->json($feedback['choices'][0]['message']['content']);
     }

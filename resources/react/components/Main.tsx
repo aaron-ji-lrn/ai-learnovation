@@ -7,13 +7,14 @@ import QuestionContainer from './QuestionContainer';
 import MarkdownContainer from './MarkdownContainer';
 import StudentAvatar from './StudentAvatar';
 import AiAvatar from './AiAvatar';
-import CategoryDropdown from './CategoryDropdown';
+import Dropdown from './Dropdown';
 import ClassDropdown from './ClassDropdown';
 // import axios from 'axios';
 
 export interface Student {
     name: string;
     id: string;
+    sessionId: string;
     age: number;
     nationality: string;
     assessments: any[];
@@ -31,7 +32,8 @@ const GridCol = ({ label, value }: { label: string; value: string }) => {
 
 function Main() {
     const [selectedStudent, setSelectedStudent] = useState<Student>(null);
-    const [selectedClass, setSelectedClass] = useState<Student>(null);
+    const [selectedClass, setSelectedClass] = useState(null);
+    const [activity, setActivity] = useState('');
     const [feedbackLoading, setFeedbackLoading] = useState(false);
     const [aiFeedbackResponse, setAiFeedbackResponse] = useState(null);
     const [category, setCategory] = useState('');
@@ -41,6 +43,7 @@ function Main() {
     ).map((student: any) => ({
         name: student.name,
         id: student.student_id,
+        sessionId: student.session_id,
         age: student.age,
         nationality: student.nationality,
         assessments: student.assessments,
@@ -51,7 +54,7 @@ function Main() {
     const studentFeedback = async (data: any) => {
         // @ts-ignore
         setFeedbackLoading(true);
-        const result = await aiFeedback(data);
+        const result = await aiFeedback(activity, data.sessionId);
         setAiFeedbackResponse(result);
         setFeedbackLoading(false);
     };
@@ -68,15 +71,6 @@ function Main() {
 
     const classes = [];
 
-    const categories = [
-        {
-            name: 'Class',
-        },
-        {
-            name: 'Student',
-        },
-    ];
-
     const showContent = selectedStudent || selectedClass;
 
     return (
@@ -86,17 +80,37 @@ function Main() {
             </header>
             <div className="flex p-4 flex-row">
                 <div className="flex p-4 text-xl">Generate feedback for</div>
-                <CategoryDropdown
-                    label="Select a category"
-                    items={categories}
+                <Dropdown
+                    label="Select an activity"
+                    items={[
+                        {
+                            name: 'ai_english_assessment',
+                        },
+                    ]}
                     onSelect={(selection) => {
-                        setCategory(selection?.name);
+                        setActivity(selection?.name);
                     }}
                 />
+                {activity && (
+                    <Dropdown
+                        label="Select a category"
+                        items={[
+                            {
+                                name: 'Class',
+                            },
+                            {
+                                name: 'Student',
+                            },
+                        ]}
+                        onSelect={(selection) => {
+                            setCategory(selection?.name);
+                        }}
+                    />
+                )}
                 {category === 'Class' && (
                     <ClassDropdown
                         items={classes}
-                        label="Class"
+                        label="Select a class"
                         onSelect={onSelectClass}
                         placeholder="Search a class"
                     />
@@ -104,7 +118,7 @@ function Main() {
                 {category === 'Student' && (
                     <StudentDropdown
                         items={students}
-                        label="Student"
+                        label="Select a atudent"
                         onSelect={onSelectStudent}
                         placeholder="Search a student"
                     />

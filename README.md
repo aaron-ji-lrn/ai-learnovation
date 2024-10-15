@@ -11,7 +11,7 @@
 - add openai_key to call AI endpoint
 - set the session driver to use file
 
-```
+```env
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=false
@@ -21,7 +21,7 @@ SESSION_DOMAIN=null
 
 - add datasource configurations for ibk, qr, dexter, you can get the consumer 0034 datasource info from central
 
-```
+```env
 DEXTER_CONNECTION=mysql
 DEXTER_HOST=db-hmhccas.int.lninfra.net
 DEXTER_DB_NAME=dev_dexter_ember
@@ -46,13 +46,20 @@ IBK_DB_PASSWORD=
 
 - yarn install
 - yarn dev
-- <http://localhost:8085/generate/>
 
 ### Running the backend
 
-```
+```bash
 php artisan serve
 ```
+
+you will see something like this:
+
+```bash
+  INFO  Server running on [http://127.0.0.1:8000].  
+```
+
+Now you can access it through url <http://127.0.0.1:8000>
 
 we didn't use sail for the docker environment, because the for php8.3 with sail plugin we couldn't connect to postgres DB
 

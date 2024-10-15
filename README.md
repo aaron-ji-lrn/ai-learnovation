@@ -1,13 +1,16 @@
 # Assessment feedback
+
 - An App for graders (teachers) to assisst them for generating a hollistic feedback of a student or class assessments
-- Project document: https://learnosity.atlassian.net/wiki/spaces/PT/pages/3006824651/Moving+from+AI+generated+question+level+feedback+to+holistic+assessment+feedback
+- Project document: <https://learnosity.atlassian.net/wiki/spaces/PT/pages/3006824651/Moving+from+AI+generated+question+level+feedback+to+holistic+assessment+feedback>
 
 ## Getting started
+
 - Run `composer install`
 - `yarn install`
 - .env configuration
 - add openai_key to call AI endpoint
 - set the session driver to use file
+
 ```
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
@@ -15,7 +18,9 @@ SESSION_ENCRYPT=false
 SESSION_PATH=/
 SESSION_DOMAIN=null
 ```
+
 - add datasource configurations for ibk, qr, dexter, you can get the consumer 0034 datasource info from central
+
 ```
 DEXTER_CONNECTION=mysql
 DEXTER_HOST=db-hmhccas.int.lninfra.net
@@ -38,16 +43,20 @@ IBK_DB_PASSWORD=
 ```
 
 ### Running the frontend
+
 - yarn install
 - yarn dev
-- http://localhost:8085/generate/
+- <http://localhost:8085/generate/>
 
 ### Running the backend
+
 ```
 php artisan serve
 ```
+
 we didn't use sail for the docker environment, because the for php8.3 with sail plugin we couldn't connect to postgres DB
 
 ## Tech Stack
+
 - Backend: PHP + Laravel + Blade + OpenAI
 - Frontend : ReactJS + Tailwind + Typescript

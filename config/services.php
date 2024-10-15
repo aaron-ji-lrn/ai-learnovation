@@ -34,5 +34,13 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'jira' => [
+        'base_url' => env('JIRA_BASE_URL'),
+        'email' => env('JIRA_EMAIL'),
+        'token' => env('JIRA_API_TOKEN'),
+    ],
+    'ai' => [
+        'openai_api_key' => env('OPENAI_API_KEY'),
+        'media_folder' => env('MEDIA_FOLDER'),
+    ],
 ];

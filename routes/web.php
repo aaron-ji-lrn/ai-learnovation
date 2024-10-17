@@ -5,8 +5,6 @@ use App\Http\Controllers\SprintUpdateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\GoogleSlidesController;
-use App\Http\Controllers\YouTubeController;
-use App\Http\Controllers\MediaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,7 +30,3 @@ Route::get('insert-audio', [GoogleSlidesController::class, 'insertAudio'])->name
 Route::get('insert-text', [GoogleSlidesController::class, 'addTextToSlide'])->name('insert.text');
 Route::get('google/slides/auth', [GoogleSlidesController::class, 'redirectToGoogle'])->name('google.slides.auth');
 Route::get('google/slides/callback', [GoogleSlidesController::class, 'handleGoogleCallback'])->name('google.slides.callback');
-
-// Route::get('upload-youtube', [YouTubeController::class, 'uploadYoutube'])->name('upload.youtube');
-// Route::get('google/youtube/auth', [YouTubeController::class, 'redirectToGoogle'])->name('google.youtube.auth');
-// Route::get('google/youtube/callback', [YouTubeController::class, 'handleGoogleCallback'])->name('google.youtube.callback');

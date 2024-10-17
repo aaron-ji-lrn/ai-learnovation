@@ -42,3 +42,9 @@ php artisan serve
 - put these info into the `.env` file
 - access url <http://127.0.0.1:8000/sprint/inex> to run the whole process.
 - after run this you can go to google slide do some tweaks if needed.
+
+## Step by step
+
+- you can first access url <http://127.0.0.1:8000/sprint/text> to grap all tickets and insert them to the slide, so that we can check are all the tickets have proper info.
+- then we do some tweaks, until we feel the tickets info are correct
+- finally we run the whole process by access <http://127.0.0.1:8000/sprint/inex>

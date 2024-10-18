@@ -14,19 +14,19 @@ class SprintUpdateController extends Controller
     protected $jiraService;
     protected $googleService;
     protected $mediaService;
-    protected const GOOGLE_SLIDES_CALLBACK = 'google.slides.callback';
-    protected const GOOGLE_DRIVE_CALLBACK = 'google.drive.callback';
 
     public function __construct(
         AiService $aiService, 
         JiraService $jiraService, 
         GoogleService $googleService,
-        MediaService $mediaService
+        MediaService $mediaService,
+        Request $request
     ){
         $this->aiService = $aiService;
         $this->jiraService = $jiraService;
         $this->googleService = $googleService;
         $this->mediaService = $mediaService;
+        $this->googleService->client->setState($request->route()->getName());
     }
 
     public function index(Request $request)
@@ -48,10 +48,7 @@ class SprintUpdateController extends Controller
             return response()->json($videoResult, 404);
         }
 
-        $googleClient = $this->googleService->authenticate(
-            $request->route()->getName(), 
-            self::GOOGLE_DRIVE_CALLBACK
-        );
+        $googleClient = $this->googleService->authenticate();
 
         if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
             return $googleClient;
@@ -61,15 +58,6 @@ class SprintUpdateController extends Controller
         $fileId = $uploadResult['file_id'] ?? null;
         if ($fileId === null) {
             return response()->json($uploadResult , 500);
-        }
-
-        $googleClient = $this->googleService->authenticate( 
-            $request->route()->getName(), 
-            self::GOOGLE_SLIDES_CALLBACK
-        );
-
-        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
-            return $googleClient;
         }
 
         $response = $this->googleService->addTicketsToSlide($googleClient, $tickets);
@@ -146,14 +134,12 @@ class SprintUpdateController extends Controller
             return response()->json(['message' => 'video file not existed'], 404);
         }
 
-        $googleClient = $this->googleService->authenticate(
-            $request->route()->getName(), 
-            self::GOOGLE_DRIVE_CALLBACK
-        );
+        $googleClient = $this->googleService->authenticate();
 
         if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
             return $googleClient;
         }
+
         $response = $this->googleService->uploadVideoToDrive(
             $googleClient,
             $videoFileName
@@ -169,10 +155,8 @@ class SprintUpdateController extends Controller
     public function insertTicketsToSlide(Request $request)
     {
         $tickets = $this->jiraService->getSprintTickets();
-        $googleClient = $this->googleService->authenticate(
-            $request->route()->getName(), 
-            self::GOOGLE_SLIDES_CALLBACK
-        );
+        
+        $googleClient = $this->googleService->authenticate();
 
         if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
             return $googleClient;
@@ -194,9 +178,7 @@ class SprintUpdateController extends Controller
             return response()->json(['error' => 'video file ID not provided'], 500);
         }
 
-        $googleClient = $this->googleService->authenticate(
-            $request->route()->getName(), 
-            self::GOOGLE_SLIDES_CALLBACK);
+        $googleClient = $this->googleService->authenticate();
 
         if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
             return $googleClient;

@@ -19,14 +19,11 @@ class GoogleController extends Controller
         if ($request->has('code')) {
             $authCode = $request->input('code');
             $originalRoute = $request->input('state');
-            $callbackRoute = $request->route()->getName();
 
-            $this->googleService->handleCallback(
-                $authCode, 
-                GoogleService::GOOGLE_TOKEN_PATH, 
-                $originalRoute, 
-                $callbackRoute
-            );
+            $this->googleService->client->setState($originalRoute);
+            $accessToken = $this->googleService->client->fetchAccessTokenWithAuthCode($authCode);
+            $this->googleService->client->setAccessToken($accessToken);
+            file_put_contents(storage_path(GoogleService::GOOGLE_TOKEN_PATH), json_encode($this->googleService->client->getAccessToken()));
 
             return redirect()->route($originalRoute);
         }

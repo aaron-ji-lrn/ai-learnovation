@@ -45,11 +45,19 @@ php artisan serve
     - We can get the google drive file ID from the url, refer this image to see ![google drive file ID 1](./doc_images/google_drive_file_id_1.png) ![google drive file ID 2](./doc_images/google_drive_file_id_2.png)
 
 - put these info into the `.env` file
-- access url <http://127.0.0.1:8000/sprint/inex> to run the whole process.
+- access url <http://127.0.0.1:8000/sprint/run_sprint_update_process> to run the whole process.
 - after run this you can go to google slide do some tweaks if needed.
 
 ## Step by step
 
-- you can first access url <http://127.0.0.1:8000/sprint/text> to grap all tickets and insert them to the slide, so that we can check are all the tickets have proper info.
-- then we do some tweaks, until we feel the tickets info are correct
-- finally we run the whole process by access <http://127.0.0.1:8000/sprint/inex>
+- you can first access url <http://127.0.0.1:8000/sprint/tickets> to grap all tickets from a sprint and check them
+- you can then access url <http://127.0.0.1:8000/sprint/summary> to see AI generated summary for that sprint
+- you can then access url <http://127.0.0.1:8000/sprint/summary_audio> to see AI generated summary audio for that sprint
+- you can then access url <http://127.0.0.1:8000/sprint/summary_audio_convert> to convert AI generated summary audio to mp4 video, you'll need to grap audio file from previous step
+- you can then access url <http://127.0.0.1:8000/sprint/upload_video> to upload the video to google drive, you'll need grap video file id from previous step
+- you can then access url <http://127.0.0.1:8000/sprint/insert_tickets_to_slide> to insert tickets info to the google slide, you can go to google slide have a check afterwards. You can do some tweaks, until you feel the tickets info are correct
+- you can then access url <http://127.0.0.1:8000/sprint/insert_video_to_slide> to insert the video to google slide, you can go to google slide have a check afterwards.
+
+## run once for all steps
+
+- You can run the whole process by access <http://127.0.0.1:8000/sprint/run_sprint_update_process> and it will do all the steps above for you.

@@ -13,6 +13,7 @@ class GoogleService
 {
     public const GOOGLE_SERVICE_CREDENTIAL_PATH = 'app/google/credentials.json';
     public const GOOGLE_TOKEN_PATH = 'app/google/token.json';
+    public const GOOGLE_CALLBACK = 'google.callback';
     public $client;
 
     public function __construct()
@@ -27,12 +28,11 @@ class GoogleService
         ]);
         $this->client->setAccessType('offline');
         $this->client->setPrompt('select_account consent');
+        $this->client->setRedirectUri(route(self::GOOGLE_CALLBACK));
     }
 
-    public function authenticate($requestRoute, $callbackRoute)
+    public function authenticate()
     {
-        $this->client->setState($requestRoute); // Store the original route name in state
-        $this->client->setRedirectUri(route($callbackRoute));
         // Load previously authorized token from a file
         $tokenPath = storage_path(self::GOOGLE_TOKEN_PATH);
         if (file_exists($tokenPath)) {
@@ -52,19 +52,6 @@ class GoogleService
         }
 
         return $this->client;
-    }
-
-    public function handleCallback($authCode, $tokenPath, $originalRoute, $callbackRoute)
-    {
-        $this->client->setRedirectUri(route($callbackRoute));
-        $this->client->setState($originalRoute);
-        $accessToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
-            
-        $this->client->setAccessToken($accessToken);
-
-        // Save the token for future use
-        $tokenPath = storage_path($tokenPath);
-        file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
     }
 
     public function addTicketsToSlide($client, $tickets)

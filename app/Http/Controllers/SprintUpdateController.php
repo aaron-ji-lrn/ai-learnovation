@@ -49,7 +49,6 @@ class SprintUpdateController extends Controller
         }
 
         $googleClient = $this->googleService->authenticate(
-            'drive', 
             $request->route()->getName(), 
             self::GOOGLE_DRIVE_CALLBACK
         );
@@ -64,8 +63,7 @@ class SprintUpdateController extends Controller
             return response()->json($uploadResult , 500);
         }
 
-        $googleClient = $this->googleService->authenticate(
-            'slides', 
+        $googleClient = $this->googleService->authenticate( 
             $request->route()->getName(), 
             self::GOOGLE_SLIDES_CALLBACK
         );
@@ -149,7 +147,6 @@ class SprintUpdateController extends Controller
         }
 
         $googleClient = $this->googleService->authenticate(
-            'drive', 
             $request->route()->getName(), 
             self::GOOGLE_DRIVE_CALLBACK
         );
@@ -173,7 +170,6 @@ class SprintUpdateController extends Controller
     {
         $tickets = $this->jiraService->getSprintTickets();
         $googleClient = $this->googleService->authenticate(
-            'slides', 
             $request->route()->getName(), 
             self::GOOGLE_SLIDES_CALLBACK
         );
@@ -199,7 +195,6 @@ class SprintUpdateController extends Controller
         }
 
         $googleClient = $this->googleService->authenticate(
-            'slides', 
             $request->route()->getName(), 
             self::GOOGLE_SLIDES_CALLBACK);
 

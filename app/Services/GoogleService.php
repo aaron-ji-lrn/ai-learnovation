@@ -12,9 +12,8 @@ use Google\Service\Drive\DriveFile;
 class GoogleService
 {
     public const GOOGLE_SERVICE_CREDENTIAL_PATH = 'app/google/credentials.json';
-    public const GOOGLE_DRIVE_TOKEN_PATH = 'app/google/token_drive.json';
-    public const GOOGLE_SLIDES_TOKEN_PATH = 'app/google/token_slides.json';
-    protected $client;
+    public const GOOGLE_TOKEN_PATH = 'app/google/token.json';
+    public $client;
 
     public function __construct()
     {
@@ -30,22 +29,12 @@ class GoogleService
         $this->client->setPrompt('select_account consent');
     }
 
-    public function authenticate($service, $requestRoute, $callbackRoute)
+    public function authenticate($requestRoute, $callbackRoute)
     {
-        switch ($service) {
-            case 'drive':
-                $serviceTokenPath = self::GOOGLE_DRIVE_TOKEN_PATH;
-                break;
-            case 'slides':
-                $serviceTokenPath = self::GOOGLE_SLIDES_TOKEN_PATH;
-                break;
-            default:
-                return response()->json(['error' => 'Invalid token path'], 500);
-        }
         $this->client->setState($requestRoute); // Store the original route name in state
         $this->client->setRedirectUri(route($callbackRoute));
         // Load previously authorized token from a file
-        $tokenPath = storage_path($serviceTokenPath);
+        $tokenPath = storage_path(self::GOOGLE_TOKEN_PATH);
         if (file_exists($tokenPath)) {
             $accessToken = json_decode(file_get_contents($tokenPath), true);
             $this->client->setAccessToken($accessToken);

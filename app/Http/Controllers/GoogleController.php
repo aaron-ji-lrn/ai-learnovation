@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 class GoogleController extends Controller
 {
     protected $googleService;
-    protected $tokenPath;
 
     public function __construct(GoogleService $googleService)
     {
@@ -22,7 +21,12 @@ class GoogleController extends Controller
             $originalRoute = $request->input('state');
             $callbackRoute = $request->route()->getName();
 
-            $this->googleService->handleCallback($authCode, $this->tokenPath, $originalRoute, $callbackRoute);
+            $this->googleService->handleCallback(
+                $authCode, 
+                GoogleService::GOOGLE_TOKEN_PATH, 
+                $originalRoute, 
+                $callbackRoute
+            );
 
             return redirect()->route($originalRoute);
         }

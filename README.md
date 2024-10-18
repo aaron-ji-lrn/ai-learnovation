@@ -7,6 +7,7 @@
 
 - Run `composer install`
 - `yarn install`
+- `yarn build`
 - .env configuration
 - add openai_key to call AI endpoint
 - set the session driver to use file

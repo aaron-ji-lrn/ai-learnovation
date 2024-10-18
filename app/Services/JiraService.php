@@ -16,6 +16,34 @@ class JiraService
         ]);
     }
 
+    public function getSprintTickets($forceFetch = false)
+    {
+        $sprintId = env('SPRINT_ID');
+        $ticketsPath = storage_path("app/sprint/sprint_{$sprintId}_tickets.json");
+        // create a file to store the tickets
+        $ticketsDir = dirname($ticketsPath);
+
+        if (!file_exists($ticketsDir)) {
+            mkdir($ticketsDir, 0777, true);
+        }
+
+        if (!file_exists($ticketsPath)) {
+            $forceFetch = true;
+        }
+
+        if ($forceFetch) {
+            $tickets = $this->getTicketsFromSprint($sprintId);
+            $tickets = $this->processTickets($tickets);
+            // save the tickets to a file
+            
+            file_put_contents($ticketsPath, json_encode($tickets));
+        }
+        // get the tickets from the file
+        $tickets = json_decode(file_get_contents($ticketsPath), true);
+
+        return $tickets;
+    }
+
     // Fetch tickets from the last sprint
     public function getTicketsFromSprint($sprintId)
     {

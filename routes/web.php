@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\SprintUpdateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
@@ -18,15 +19,17 @@ Route::get('/feedback/{activityId}/{sessionId}', [AssessmentController::class, '
 
 
 /***********sprint update AI project ***************/
-Route::get('/sprint/index', [SprintUpdateController::class, 'index'])->name('sprint.update');
-Route::get('/sprint/video', [SprintUpdateController::class, 'insertVideo'])->name('sprint.insert.video');
-Route::get('/sprint/text', [SprintUpdateController::class, 'insertText'])->name('sprint.insert.text');
 
-Route::get('upload-audio', [GoogleDriveController::class, 'uploadAudio'])->name('upload.audio');
-Route::get('upload-video', [GoogleDriveController::class, 'uploadVideo'])->name('upload.video');
+Route::get('/sprint/run_sprint_update_process', [SprintUpdateController::class, 'index'])->name('sprint.update');
+
+Route::get('/sprint/tickets', [SprintUpdateController::class, 'tickets'])->name('sprint.tickets');
+Route::get('/sprint/summary', [SprintUpdateController::class, 'sprintSummary'])->name('sprint.tickets.summary');
+Route::get('/sprint/summary_audio', [SprintUpdateController::class, 'generateSummaryAudio'])->name('sprint.tickets.summary.audio');
+Route::get('/sprint/summary_audio_convert', [SprintUpdateController::class, 'convertAudioToMp4'])->name('sprint.tickets.summary.audio.convert');
+Route::get('/sprint/upload_video', [SprintUpdateController::class, 'uploadVideoToGoogleDrive'])->name('sprint.tickets.summary.video.upload');
+
+Route::get('/sprint/insert_tickets_to_slide', [SprintUpdateController::class, 'insertTicketsToSlide'])->name('sprint.slide.tickets');
+Route::get('/sprint/insert_video_to_slide', [SprintUpdateController::class, 'insertVideoToSlide'])->name('sprint.slide.video');
+
 Route::get('google/drive/callback', [GoogleDriveController::class, 'handleGoogleCallback'])->name('google.drive.callback');
-
-Route::get('insert-audio', [GoogleSlidesController::class, 'insertAudio'])->name('insert.audio');
-Route::get('insert-text', [GoogleSlidesController::class, 'addTextToSlide'])->name('insert.text');
-Route::get('google/slides/auth', [GoogleSlidesController::class, 'redirectToGoogle'])->name('google.slides.auth');
 Route::get('google/slides/callback', [GoogleSlidesController::class, 'handleGoogleCallback'])->name('google.slides.callback');

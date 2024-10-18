@@ -4,14 +4,19 @@ namespace App\Services;
 
 class MediaService
 {
-    public function convertAudioToMp4($audioFileName, $mediaFolder)
+    public function convertAudioToMp4($audioFileName)
     {
         $data = [];
+        $mediaFolder = env('MEDIA_FOLDER') ?? 'sprint';
         // Path to your audio file in the public folder
         $imagePath = public_path($mediaFolder . '/cover.jpg');
-        $audioPath = public_path($audioFileName);
-        $fileName = $mediaFolder . '/sprint_update_'.date('Y-m-d'). '.mp4';
-        $outputVideoPath = public_path($fileName);
+        if (!file_exists($imagePath)) {
+            $imagePath = null;
+        }
+        $audioPath = public_path($mediaFolder . '/' . $audioFileName);
+        $fileName = 'sprint_update_'.date('Y-m-d'). '.mp4';
+        $filePath = $mediaFolder . '/' . $fileName;
+        $outputVideoPath = public_path($filePath);
 
         try {
             // Check if you have a background image to use as a static image in the video
@@ -28,9 +33,9 @@ class MediaService
                 $extraInfo[] = 'Input audio duration: ' . $audioDuration . ' seconds';
 
                 // Convert the audio file to a video file with a static image using FFmpeg
-                $ffmpegCommand = "ffmpeg -i $audioPathEscaped -c:a copy $outputVideoPathEscaped";
-                if ($imagePathEscaped) {
-                    $ffmpegCommand = "ffmpeg -loop 1 -i $imagePathEscaped -i $audioPathEscaped -c:a copy -c:v libx264 -shortest $outputVideoPathEscaped";
+                $ffmpegCommand = "ffmpeg -y -i $audioPathEscaped -c:a copy $outputVideoPathEscaped";
+                if ($imagePath) {
+                    $ffmpegCommand = "ffmpeg -y -loop 1 -i $imagePathEscaped -i $audioPathEscaped -c:a copy -c:v libx264 -shortest $outputVideoPathEscaped";
                 }
                 
                 exec($ffmpegCommand, $output, $returnVar);

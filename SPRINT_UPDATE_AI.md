@@ -17,7 +17,12 @@ sequenceDiagram
 
 ## How to run the project
 
+- provide google api credential info and put into `storage/app/google/credentials.json`, you can download the json file from google api service, check [here](https://console.cloud.google.com/apis/credentials?project=ai-sprintupdate&supportedpurview=project)
+
 ```bash
+composer install
+yarn install
+yarn build
 php artisan serve
 ```
 

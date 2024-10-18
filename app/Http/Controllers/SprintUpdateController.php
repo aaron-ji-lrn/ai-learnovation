@@ -6,6 +6,7 @@ use App\Services\AiService;
 use App\Services\GoogleService;
 use App\Services\JiraService;
 use App\Services\MediaService;
+use Illuminate\Http\Request;
 
 class SprintUpdateController extends Controller
 {
@@ -13,6 +14,8 @@ class SprintUpdateController extends Controller
     protected $jiraService;
     protected $googleService;
     protected $mediaService;
+    protected const GOOGLE_SLIDES_CALLBACK = 'google.slides.callback';
+    protected const GOOGLE_DRIVE_CALLBACK = 'google.drive.callback';
 
     public function __construct(
         AiService $aiService, 
@@ -26,44 +29,58 @@ class SprintUpdateController extends Controller
         $this->mediaService = $mediaService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $sprintId = 1258;
-        $presentationId = env('GOOGLE_SLIDE_ID');
-        $pageObjectId = env('GOOGLE_SLIDE_PAGE_ID');
-        $googleDriveFolderId = env('GOOGLE_DRIVE_FOLDER_ID');
         $mediaFolder = env('MEDIA_FOLDER');
 
-        $tickets = $this->jiraService->getTicketsFromSprint($sprintId);
-        $tickets = $this->jiraService->processTickets($tickets);
-
-        $response = $this->googleService->addTicketsToSlide($tickets, $presentationId, $pageObjectId);
-
-        if ($response instanceof \Illuminate\Http\RedirectResponse) {
-            return $response;
-        }
-        
+        $tickets = $this->jiraService->getSprintTickets();
         $summary = $this->aiService->getSprintSummary(json_encode($tickets));
 
-        $audioResult = $this->aiService->generateAudio($summary, $mediaFolder);
+        $audioResult = $this->aiService->generateAudio($summary);
         $audioFileName = $audioResult['audio'] ?? null;
-        if (!file_exists(public_path($audioFileName))) {
+        if (!file_exists(public_path($mediaFolder. '/' .$audioFileName))) {
             return response()->json($audioResult, 404);
         }
 
-        $videoResult = $this->mediaService->convertAudioToMp4($audioFileName, $mediaFolder);
+        $videoResult = $this->mediaService->convertAudioToMp4($audioFileName);
         $videoFileName = $videoResult['video'] ?? null;
-        if (!file_exists(public_path($videoFileName))) {
+        if (!file_exists(public_path($mediaFolder. '/' .$videoFileName))) {
             return response()->json($videoResult, 404);
         }
 
-        $uploadResult = $this->googleService->uploadVideoToDrive($videoFileName, $googleDriveFolderId);
+        $googleClient = $this->googleService->authenticate(
+            'drive', 
+            $request->route()->getName(), 
+            self::GOOGLE_DRIVE_CALLBACK
+        );
+
+        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
+            return $googleClient;
+        }
+
+        $uploadResult = $this->googleService->uploadVideoToDrive($googleClient, $videoFileName);
         $fileId = $uploadResult['file_id'] ?? null;
         if ($fileId === null) {
             return response()->json($uploadResult , 500);
         }
 
-        $result = $this->googleService->insertVideoToSlide($fileId, $presentationId, $pageObjectId);
+        $googleClient = $this->googleService->authenticate(
+            'slides', 
+            $request->route()->getName(), 
+            self::GOOGLE_SLIDES_CALLBACK
+        );
+
+        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
+            return $googleClient;
+        }
+
+        $response = $this->googleService->addTicketsToSlide($googleClient, $tickets);
+
+        if ($response instanceof \Illuminate\Http\RedirectResponse) {
+            return $response;
+        }
+
+        $result = $this->googleService->insertVideoToSlide($googleClient, $fileId);
 
         return response()->json([
             'tickets' => $tickets,
@@ -75,31 +92,130 @@ class SprintUpdateController extends Controller
         ]);
     }
 
-    public function insertText()
+    /**
+     * List all tickets from the sprint
+     */
+    public function tickets()
     {
-        $sprintId = 1258;
-        $presentationId = env('GOOGLE_SLIDE_ID');
-        $pageObjectId = env('GOOGLE_SLIDE_PAGE_ID');
-
-        $tickets = $this->jiraService->getTicketsFromSprint($sprintId);
-        $tickets = $this->jiraService->processTickets($tickets);
-
-        $response = $this->googleService->addTicketsToSlide($tickets, $presentationId, $pageObjectId);
-
-        if ($response instanceof \Illuminate\Http\RedirectResponse) {
-            return $response;
-        }
-
-        return response()->json($tickets);
+        return response()->json($this->jiraService->getSprintTickets());
     }
 
-    public function insertVideo()
+    public function sprintSummary()
     {
-        $fileId = '13vKA3RurlBh-VgBokQgILNrP4kVkJJgB';
-        $presentationId = '1drzZI_o1Qrm3or2gvmXj8l_SYk8h80bjj59SqEAJkeM';
-        $pageObjectId = 'g30af94bd423_0_0';
-        $result = $this->googleService->insertVideoToSlide($fileId, $presentationId, $pageObjectId);
+        $tickets = $this->jiraService->getSprintTickets();
+        $summary = $this->aiService->getSprintSummary(json_encode($tickets));
 
-        return response()->json($result);
+        return response()->json([
+            'message' => 'generate summary successfully',
+            'summary' => $summary, 
+        ]);
+    }
+
+    public function generateSummaryAudio()
+    {
+        $tickets = $this->jiraService->getSprintTickets();
+        $summary = $this->aiService->getSprintSummary(json_encode($tickets));
+        $result = $this->aiService->generateAudio($summary);
+
+        return response()->json([
+            'message' => 'generate audio successfully',
+            'summary' => $summary, 
+            'response' => $result
+        ]);
+    }
+
+    public function convertAudioToMp4()
+    {
+        $audioFileName = 'sprint_speech_2024-10-18.mp3';
+        $mediaFolder = env('MEDIA_FOLDER');
+        if (!file_exists(public_path($mediaFolder . '/' . $audioFileName))) {
+            return response()->json(['message' => 'audio file not existed'], 404);
+        }
+        $result = $this->mediaService->convertAudioToMp4($audioFileName);
+
+        return response()->json([
+            'message' => 'covert audio to video successfully', 
+            'file' => $audioFileName, 
+            'response' => $result
+        ]);
+    }
+
+    public function uploadVideoToGoogleDrive(Request $request)
+    {
+        $videoFileName = 'sprint_update_2024-10-18.mp4';
+        $mediaFolder = env('MEDIA_FOLDER');
+        if (!file_exists(public_path($mediaFolder . '/' . $videoFileName))) {
+            return response()->json(['message' => 'video file not existed'], 404);
+        }
+
+        $googleClient = $this->googleService->authenticate(
+            'drive', 
+            $request->route()->getName(), 
+            self::GOOGLE_DRIVE_CALLBACK
+        );
+
+        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
+            return $googleClient;
+        }
+        $response = $this->googleService->uploadVideoToDrive(
+            $googleClient,
+            $videoFileName
+        );
+
+        return response()->json([
+            'message' => 'upload video to google drive successfully', 
+            'file' => $videoFileName, 
+            'response' => $response
+        ]);
+    }
+
+    public function insertTicketsToSlide(Request $request)
+    {
+        $tickets = $this->jiraService->getSprintTickets();
+        $googleClient = $this->googleService->authenticate(
+            'slides', 
+            $request->route()->getName(), 
+            self::GOOGLE_SLIDES_CALLBACK
+        );
+
+        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
+            return $googleClient;
+        }
+
+        $response = $this->googleService->addTicketsToSlide($googleClient, $tickets);
+
+        return response()->json([
+            'message' => 'Tickets added to slide', 
+            'tickets' => $tickets, 
+            'response' => $response
+        ]);
+    }
+
+    public function insertVideoToSlide(Request $request)
+    {
+        $fileId = '1G4IETjSczfB2QVWZ5BjjFdjUl95hHDdD';
+        if (!$fileId) {
+            return response()->json(['error' => 'video file ID not provided'], 500);
+        }
+
+        $googleClient = $this->googleService->authenticate(
+            'slides', 
+            $request->route()->getName(), 
+            self::GOOGLE_SLIDES_CALLBACK);
+
+        if ($googleClient instanceof \Illuminate\Http\RedirectResponse) {
+            return $googleClient;
+        }
+
+        $response = $this->googleService->insertVideoToSlide(
+            $googleClient,
+            $fileId
+        );
+
+        return response()->json([
+            'message'=> 'Insert video to google slide successfully',
+            'fileId' => $fileId, 
+            'response' => $response
+        ]);
     }
 }

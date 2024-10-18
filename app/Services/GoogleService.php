@@ -30,8 +30,19 @@ class GoogleService
         $this->client->setPrompt('select_account consent');
     }
 
-    public function authenticate($serviceTokenPath, $callbackRoute)
+    public function authenticate($service, $requestRoute, $callbackRoute)
     {
+        switch ($service) {
+            case 'drive':
+                $serviceTokenPath = self::GOOGLE_DRIVE_TOKEN_PATH;
+                break;
+            case 'slides':
+                $serviceTokenPath = self::GOOGLE_SLIDES_TOKEN_PATH;
+                break;
+            default:
+                return response()->json(['error' => 'Invalid token path'], 500);
+        }
+        $this->client->setState($requestRoute); // Store the original route name in state
         $this->client->setRedirectUri(route($callbackRoute));
         // Load previously authorized token from a file
         $tokenPath = storage_path($serviceTokenPath);
@@ -54,8 +65,10 @@ class GoogleService
         return $this->client;
     }
 
-    public function handleCallback($authCode, $tokenPath)
+    public function handleCallback($authCode, $tokenPath, $originalRoute, $callbackRoute)
     {
+        $this->client->setRedirectUri(route($callbackRoute));
+        $this->client->setState($originalRoute);
         $accessToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
             
         $this->client->setAccessToken($accessToken);
@@ -65,25 +78,23 @@ class GoogleService
         file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
     }
 
-    public function addTicketsToSlide($tickets, $presentationId, $pageObjectId)
+    public function addTicketsToSlide($client, $tickets)
     {
-        $callbackRoute = 'google.slides.callback';
-        $tokenPath = self::GOOGLE_SLIDES_TOKEN_PATH;
-        $authClient = $this->authenticate($tokenPath, $callbackRoute);
-
-        if ($authClient instanceof \Illuminate\Http\RedirectResponse) {
-            return $authClient;
-        }
-
         $deliveredTextContent = $this->buildTextContent($tickets['delivered']);
         $inProgressTextContent = $this->buildTextContent($tickets['in_progress']);
-        $this->addTextToSlide($deliveredTextContent, $presentationId, $pageObjectId);
-        $this->addTextToSlide($inProgressTextContent, $presentationId, $pageObjectId);
+        $this->addTextToSlide($client, $deliveredTextContent);
+        $this->addTextToSlide($client, $inProgressTextContent);
     }
 
-    public function addTextToSlide($text, $presentationId, $pageObjectId)
+    public function addTextToSlide($client, $text)
     {
-        $slidesService = new Slides($this->client);
+        $presentationId = env('GOOGLE_SLIDE_ID');
+        $pageObjectId = env('GOOGLE_SLIDE_PAGE_ID');
+        if (!$presentationId || !$pageObjectId) {
+            return ['error' => 'Google Slide ID or Page ID not found'];
+        }
+
+        $slidesService = new Slides($client);
 
         // Generate a unique ID for the text box
         $textBoxId = 'text_box_' . uniqid();
@@ -170,17 +181,15 @@ class GoogleService
         return $text;
     }
 
-    public function uploadVideoToDrive($fileName, $googleDriveFolderId)
+    public function uploadVideoToDrive($client, $fileName)
     {
-        $callbackRoute = 'google.drive.callback';
-        $tokenPath = self::GOOGLE_DRIVE_TOKEN_PATH;
-        $authClient = $this->authenticate($tokenPath, $callbackRoute);
-
-        if ($authClient instanceof \Illuminate\Http\RedirectResponse) {
-            return $authClient;
+        $mediaFolder = env('MEDIA_FOLDER');
+        $googleDriveFolderId = env('GOOGLE_DRIVE_FOLDER_ID');
+        if (!$googleDriveFolderId) {
+            return response()->json(['error' => 'Google Drive folder ID not found'], 500);
         }
 
-        $driveService = new Drive($this->client);
+        $driveService = new Drive($client);
         // Create a new file metadata
         $fileMetadata = new DriveFile([
             'name' => $fileName,
@@ -189,7 +198,7 @@ class GoogleService
         ]);
 
         // Read the file content
-        $filePath = public_path($fileName);
+        $filePath = public_path($mediaFolder . '/' .$fileName);
         $content = file_get_contents($filePath);
 
         // Upload the file
@@ -207,17 +216,16 @@ class GoogleService
         return $data;
     }
 
-    public function insertVideoToSlide($videoFileId, $presentationId, $pageObjectId)
+    public function insertVideoToSlide($client, $videoFileId)
     {
-        $callbackRoute = 'google.slides.callback';
-        $tokenPath = self::GOOGLE_SLIDES_TOKEN_PATH;
-        $authClient = $this->authenticate($tokenPath, $callbackRoute);
+        $presentationId = env('GOOGLE_SLIDE_ID');
+        $pageObjectId = env('GOOGLE_SLIDE_PAGE_ID');
 
-        if ($authClient instanceof \Illuminate\Http\RedirectResponse) {
-            return $authClient;
+        if (!$presentationId || !$pageObjectId) {
+            return response()->json(['error' => 'Google Slide ID or Page ID not found'], 500);
         }
 
-        $slidesService = new Slides($this->client);
+        $slidesService = new Slides($client);
 
         $requests = [
             new SlidesRequest([

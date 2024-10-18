@@ -108,8 +108,9 @@ class AiService
         return $responseBody['choices'][0]['message']['content'];
     }
 
-    public function generateAudio($content, $folder)
+    public function generateAudio($content)
     {
+        $folder = env('MEDIA_FOLDER') ?? 'sprint';
         set_time_limit(300); // 300 seconds = 5 minutes
         $data = [
             'model' => 'tts-1',
@@ -117,7 +118,12 @@ class AiService
             'voice' => 'alloy',
         ];
         $format = '.mp3';
-        $filename = $folder.'/sprint_speech_' .date('Y-m-d') . $format;
+        $filename = 'sprint_speech_' .date('Y-m-d') . $format;
+        $filePath = $folder.'/'.$filename;
+
+        if (!file_exists($folder)) {
+            mkdir($folder, 0777, true);
+        }
         
         try {
             // Send the POST request
@@ -127,7 +133,7 @@ class AiService
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => $data,
-                'sink' => $filename, // Save the response directly to a file
+                'sink' => $filePath, // Save the response directly to a file
             ]);
         
             $data = [

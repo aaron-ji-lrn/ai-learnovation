@@ -29,20 +29,20 @@ php artisan serve
 - provide infomation
   - sprint id
     - We need to provide the sprint ID you want to fetch tickets from.
-    - You can refer this image to know where to get the sprint ID ![sprint ID](./doc_images/jira_sprint_id.png)
+    - You can refer this image to know where to get the sprint ID ![sprint ID](../doc_images/jira_sprint_id.png)
   - presentation ID
     - We need to provide the google slide Id so that assistant know where to put conent.
-    - We can get the presentation ID from the url, refer this image to see ![presentation ID](./doc_images/presentation_id.png)
+    - We can get the presentation ID from the url, refer this image to see ![presentation ID](../doc_images/presentation_id.png)
   - slide page object ID
     - We need to know on which page we put our sprint update on.
-    - We can get the page object ID from the url, refer this image to see ![slie page object ID](./doc_images/slide_page_object_id.png)
+    - We can get the page object ID from the url, refer this image to see ![slie page object ID](../doc_images/slide_page_object_id.png)
   - Google drive folder ID
     - We need to upload our video to a google drive folder
     - Then we will insert this video from google drive folder to google slide
-    - We can get the google drive folder ID from the url, refer this image to see ![google drive folder ID](./doc_images/google_drive_folder_id.png)
+    - We can get the google drive folder ID from the url, refer this image to see ![google drive folder ID](../doc_images/google_drive_folder_id.png)
   - Google file ID
     - You can insert the video to slide again by access <http://127.0.0.1:8000/sprint/video> and provide the video file id and presentation id and page object ID.
-    - We can get the google drive file ID from the url, refer this image to see ![google drive file ID 1](./doc_images/google_drive_file_id_1.png) ![google drive file ID 2](./doc_images/google_drive_file_id_2.png)
+    - We can get the google drive file ID from the url, refer this image to see ![google drive file ID 1](../doc_images/google_drive_file_id_1.png) ![google drive file ID 2](../doc_images/google_drive_file_id_2.png)
 
 - put these info into the `.env` file
 - access url <http://127.0.0.1:8000/sprint/run_sprint_update_process> to run the whole process.

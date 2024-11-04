@@ -16,7 +16,7 @@ class JiraService
         ]);
     }
 
-    public function getSprintTickets($forceFetch = false)
+    public function getSprintTickets($forceFetch = true)
     {
         $sprintId = env('SPRINT_ID');
         $ticketsPath = storage_path("app/sprint/sprint_{$sprintId}_tickets.json");
@@ -63,8 +63,20 @@ class JiraService
         $inProgress = [];
 
         foreach ($tickets as $ticket) {
+            // I want to remove the ticket which has Interrupt/contigency in the summary
+            if (strpos($ticket['fields']['summary'], 'Interrupt/contigency') !== false) {
+                continue;
+            }
+            /*****this part is old logic, I keep here for a moment, see is it still useful*****/
             // Check for the placeholder in the summary
-            $delivered = strpos($ticket['fields']['summary'], '[PLACEHOLDER]') === false; // Replace with your actual placeholder logic
+            // $delivered = strpos($ticket['fields']['summary'], '[PLACEHOLDER]') === false; // Replace with your actual placeholder logic
+            /**********************************/
+            // if we put releases in the labels, then it is delivered, otherwise it is in progress
+            // we should update the tickets to reflect this if needed
+            $delivered = false;
+            if (in_array('releases', $ticket['fields']['labels'])) {
+                $delivered = true;
+            }
 
 
             $ticketInfo = [

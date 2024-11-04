@@ -110,9 +110,12 @@ class SprintUpdateController extends Controller
         ]);
     }
 
-    public function convertAudioToMp4()
+    public function convertAudioToMp4(Request $request)
     {
-        $audioFileName = 'sprint_speech_2024-10-18.mp3';
+        $audioFileName = $request->input('audio');
+        if (!$audioFileName) {
+            return response()->json(['error' => 'audio file not provided, please provide ?audio=xxx.mp3 in your url'], 500);
+        }
         $mediaFolder = env('MEDIA_FOLDER');
         if (!file_exists(public_path($mediaFolder . '/' . $audioFileName))) {
             return response()->json(['message' => 'audio file not existed'], 404);
@@ -128,7 +131,11 @@ class SprintUpdateController extends Controller
 
     public function uploadVideoToGoogleDrive(Request $request)
     {
-        $videoFileName = 'sprint_update_2024-10-18.mp4';
+        $videoFileName = $request->input('video');
+        if (!$videoFileName) {
+            return response()->json(['error' => 'video file not provided, please provide ?video=xxx.mp4 in your url'], 500);
+        }
+
         $mediaFolder = env('MEDIA_FOLDER');
         if (!file_exists(public_path($mediaFolder . '/' . $videoFileName))) {
             return response()->json(['message' => 'video file not existed'], 404);
@@ -173,9 +180,9 @@ class SprintUpdateController extends Controller
 
     public function insertVideoToSlide(Request $request)
     {
-        $fileId = '1G4IETjSczfB2QVWZ5BjjFdjUl95hHDdD';
+        $fileId = $request->input('file_id');
         if (!$fileId) {
-            return response()->json(['error' => 'video file ID not provided'], 500);
+            return response()->json(['error' => 'video file ID not provided, please provide ?file_id=xxx in the url, you can get the file id by share->copy link'], 500);
         }
 
         $googleClient = $this->googleService->authenticate();

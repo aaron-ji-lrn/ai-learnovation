@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\SprintUpdateController;
+use App\Http\Controllers\SprintCatchupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,3 +30,6 @@ Route::get('/sprint/insert_tickets_to_slide', [SprintUpdateController::class, 'i
 Route::get('/sprint/insert_video_to_slide', [SprintUpdateController::class, 'insertVideoToSlide'])->name('sprint.slide.video');
 
 Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+/**********1-on-1 catch up filling doc template*/
+Route::get('/sprint/catchup', [SprintCatchupController::class, 'prepare'])->name('sprint.catchup.prepare');

@@ -5,9 +5,16 @@ namespace App\Services;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as Drive;
 use Google\Service\Slides;
+use Google\Service\Docs;
 use Google\Service\Slides\Request as SlidesRequest;
+use Google\Service\Docs\Request as DocsRequest;
 use Google\Service\Slides\BatchUpdatePresentationRequest as BatchUpdatePresentationRequest;
+use Google\Service\Docs\BatchUpdateDocumentRequest;
+use Google\Service\Docs\TextStyle;
+use Google\Service\Docs\UpdateTextStyleRequest;
+use Google\Service\Docs\WeightedFontFamily;
 use Google\Service\Drive\DriveFile;
+use Parsedown;
 
 class GoogleService
 {
@@ -24,7 +31,9 @@ class GoogleService
             'https://www.googleapis.com/auth/presentations',
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/drive.file',
-            'https://www.googleapis.com/auth/drive.readonly'
+            'https://www.googleapis.com/auth/drive.readonly',
+            'https://www.googleapis.com/auth/documents',
+            'https://www.googleapis.com/auth/spreadsheets'
         ]);
         $this->client->setAccessType('offline');
         $this->client->setPrompt('select_account consent');
@@ -56,8 +65,8 @@ class GoogleService
 
     public function addTicketsToSlide($client, $tickets)
     {
-        $deliveredTextContent = $this->buildTextContent($tickets['delivered']);
-        $inProgressTextContent = $this->buildTextContent($tickets['in_progress']);
+        $deliveredTextContent = 'Delivered:'. "\n" . $this->buildTextContent($tickets['delivered']);
+        $inProgressTextContent = 'In progress:'. "\n" . $this->buildTextContent($tickets['in_progress']);
         $this->addTextToSlide($client, $deliveredTextContent);
         $this->addTextToSlide($client, $inProgressTextContent);
     }
@@ -239,4 +248,131 @@ class GoogleService
 
         return $batchUpdateResponse;
     }
+
+    // Function to insert content into another document
+    public function insertContentIntoDocument($client, $targetDocumentId, $templateDocumentId)
+    {
+        $docsService = new Docs($client);
+        $content = $this->getDocumentContent($client, $templateDocumentId);
+        $requests = [];
+
+        $insertIndex = 1;
+        
+        // Iterate over the content and insert it into the target document
+        foreach ($content as $item) {
+            if (isset($item['sectionBreak'])) {
+                $requests[] = new DocsRequest([
+                    'insertSectionBreak' => [
+                        'location' => ['index' => $item['endIndex']],
+                        'sectionType' => 'NEXT_PAGE'
+                        // 'sectionStyle' => $item['sectionBreak']['sectionStyle']
+                    ]
+                ]);
+            }
+
+            if (isset($item['paragraph'])) {
+                $elements = $item['paragraph']['elements'];
+                $paragraphContent = '';
+
+                // Concatenate text from elements
+                foreach ($elements as $element) {
+                    $paragraphContent .= $element['textRun']['content'];
+                }
+
+                $requests[] = new DocsRequest([
+                    'insertText' => [
+                        'text' => $paragraphContent,
+                        'location' => ['index' => $item['startIndex']]
+                    ]
+                ]);
+
+                // Apply text styles
+                $startIndex = $item['startIndex'];
+                foreach ($elements as $element) {
+                    if (isset($element['textRun']['textStyle'])) {
+                        $textStyle = $element['textRun']['textStyle'];
+
+                        $validTextStyle = [];
+
+                        // Filter out only valid fields
+                        foreach ($textStyle as $key => $value) {
+                            if (in_array($key, ['bold', 'italic', 'underline', 'foregroundColor', 'fontSize', 'weightedFontFamily'])) {
+                                $validTextStyle[$key] = $value;
+                            }
+                        }
+                        // print_r($textStyle);
+                        $requests[] = new DocsRequest([
+                            'updateTextStyle' => [
+                                'textStyle' => $textStyle,
+                                'range' => [
+                                    'startIndex' => $startIndex,
+                                    'endIndex' => $startIndex + strlen($element['textRun']['content'])
+                                ],
+                                'fields' => implode(',', array_keys((array)$validTextStyle))
+                            ]
+                        ]);
+                    }
+                    $startIndex += strlen($element['textRun']['content']);
+                }
+
+                // Apply paragraph style
+                if (isset($item['paragraph']['paragraphStyle'])) {
+                    $paragraphStyle = $item['paragraph']['paragraphStyle'];
+                    $validParagraphStyle = [];
+
+                    // Filter out only valid fields
+                    foreach ($paragraphStyle as $key => $value) {
+                        if (in_array($key, ['alignment', 'lineSpacing', 'spacingMode', 'indentStart', 'indentEnd', 'indentFirstLine'])) {
+                            $validParagraphStyle[$key] = $value;
+                        }
+                    }
+                    $requests[] = new DocsRequest([
+                        'updateParagraphStyle' => [
+                            'paragraphStyle' => $paragraphStyle,
+                            'range' => [
+                                'startIndex' => $item['startIndex'],
+                                'endIndex' => $item['endIndex']
+                            ],
+                            'fields' => '*'
+                        ]
+                    ]);
+                }
+            }
+        }
+
+        // Perform the batch update request
+        $batchUpdateRequest = new BatchUpdateDocumentRequest([
+            'requests' => $requests
+        ]);
+
+        $docsService->documents->batchUpdate($targetDocumentId, $batchUpdateRequest);
+    }
+
+    function textStyleToArray(TextStyle $textStyle) {
+        $array = [];
+    
+        // Convert boolean properties
+        $array['bold'] = $textStyle->getBold() ?? false;
+        $array['italic'] = $textStyle->getItalic() ?? false;
+        $array['underline'] = $textStyle->getUnderline() ?? false;
+        $array['strikethrough'] = $textStyle->getStrikethrough() ?? false;
+        $array['smallCaps'] = $textStyle->getSmallCaps() ?? false;
+    
+        // Convert weightedFontFamily if it exists
+        if ($weightedFontFamily = $textStyle->getWeightedFontFamily()) {
+            $array['weightedFontFamily'] = [
+                'fontFamily' => $weightedFontFamily->getFontFamily(),
+                'weight' => $weightedFontFamily->getWeight(),
+            ];
+        }
+    
+        return $array;
+    }
+    public function getDocumentContent($client, $documentId)
+    {
+        $docsService = new Docs($client);
+        $doc = $docsService->documents->get($documentId);
+        return $doc->getBody()->getContent(); // Get the content (structural elements)
+    }
+
 }
